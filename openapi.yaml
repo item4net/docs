@@ -1,0 +1,146 @@
+openapi: 3.0.2
+info:
+  title: item4 API
+  description: item4가 취미로 만든 정적 API들
+  version: 0.0.0
+servers:
+  - url: https://item4.net/api
+    description: 실제 서버
+paths:
+  /weather/:
+    get:
+      tags:
+        - Weather
+      summary: 최신 전국 날씨정보
+      description: 가장 최근에 수집된 전국 날씨 정보입니다.
+      responses: 
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResult'
+components:
+  schemas:
+    WeatherResult:
+      type: object
+      properties:
+        observed_at:
+          type: string
+          format: date-time
+          description: 관측일시
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherRecord'
+    WeatherRecord:
+      type: object
+      description: 날씨 계측 정보
+      properties:
+        id:
+          type: integer
+          description: 관측소 고유 ID
+        name:
+          type: string
+          description: 관측소 이름
+        height:
+          type: integer
+          description: '관측소 해발고도 (단위: m)'
+        rain:
+          $ref: '#/components/schemas/RainData'
+        temperature:
+          type: number
+          description: '현재 기온 (단위: 섭씨)'
+        wind1:
+          $ref: '#/components/schemas/Wind1Data'
+        wind10:
+          $ref: '#/components/schemas/Wind10Data'
+        humidity:
+          type: integer
+          description: '습도 (단위: %)'
+        atmospheric:
+          type: number
+          description: '해면기압 (단위: hPa)'
+        address:
+          type: string
+          description: 관측소 소재지
+    RainData:
+      type: object
+      description: 강수 상황
+      properties:
+        is_raining:
+          type: string
+          enum:
+            - Clear
+            - Rain
+            - Unavailable
+            - Unknown
+          description: >
+            강수 여부:
+             * `Clear`: 현재 맑음
+             * `Rain`: 현재 강수중
+             * `Unavailable`: 강수 여부를 지원하지 않는 관측소
+             * `Unknown`: 강수 여부가 파악되지 않고 있음
+        rain15:
+          type: number
+          description: '15분 강수량 (단위: mm)'
+        rain60:
+          type: number
+          description: '60분 강수량 (단위: mm)'
+        rain3h:
+          type: number
+          description: '3시간 강수량 (단위: mm)'
+        rain6h:
+          type: number
+          description: '6시간 강수량 (단위: mm)'
+        rain12h:
+          type: number
+          description: '12시간 강수량 (단위: mm)'
+        rainday:
+          type: number
+          description: '일일 강수량 (단위: mm)'
+    WindData:
+      type: object
+      description: 바람 정보 (Base type)
+      properties:
+        direction_code:
+          type: number
+          description: 방향계
+        direction_text:
+          type: string
+          enum:
+            - N
+            - NNW
+            - NW
+            - WNW
+            - W
+            - WSW
+            - SW
+            - SSW
+            - S
+            - SSE
+            - SE
+            - ESE
+            - E
+            - ENE
+            - NE
+            - NNE
+            - No
+            - Unavailable
+          description: >
+            풍향: 기본 방위 외의 요소만 설명합니다.
+             * `No`: 바람 없음
+             * `Unavailable`: 풍향 정보를 지원하지 않는 관측소
+        velocity:
+          type: number
+          description: '풍속 (단위: m/s)'
+    Wind1Data:
+      allOf:
+        - $ref: '#/components/schemas/WindData'
+        - type: object
+          description: 1분 바람 정보
+    Wind10Data:
+      allOf:
+        - $ref: '#/components/schemas/WindData'
+        - type: object
+          description: 10분 바람 정보
